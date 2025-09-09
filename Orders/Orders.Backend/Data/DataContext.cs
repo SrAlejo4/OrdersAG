@@ -9,12 +9,15 @@ public class DataContext : DbContext
     {
     }
 
+    public DbSet<Category> Categories { get; set; } // Create the table as a DbSet Property
     public DbSet<Country> Countries { get; set; } // Create the table as a DbSet Property
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // This method validate two properties don't share name.
+        modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique();
         modelBuilder.Entity<Country>().HasIndex(x => x.Name).IsUnique();
-        // This method validate two countries don't share name.
     }
 }
