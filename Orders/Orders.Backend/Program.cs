@@ -21,11 +21,25 @@ namespace Orders.Backend
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection"));
 
+            // Injection from SeedDb
+            // This injection allow to create a DataBase with some rules by running the program.
+            builder.Services.AddTransient<SeedDb>();
             // Injectios from GenericRepository and GenericUnitOfWork
             builder.Services.AddScoped(typeof(IGenericUnitOfWork<>), typeof(GenericUnitOfWork<>));
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             var app = builder.Build();
+            SeedData(app);
+
+            // This method allow to run SeedAsync when running program.
+            void SeedData(WebApplication app)
+            {
+                var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+                using var scope = scopedFactory!.CreateScope();
+                var service = scope.ServiceProvider.GetService<SeedDb>();
+                service!.SeedAsync().Wait();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
