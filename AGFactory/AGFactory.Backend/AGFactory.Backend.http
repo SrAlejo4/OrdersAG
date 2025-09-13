@@ -1,0 +1,6 @@
+@AGFactory.Backend_HostAddress = http://localhost:5169
+
+GET {{AGFactory.Backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
