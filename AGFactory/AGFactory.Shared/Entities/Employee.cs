@@ -24,7 +24,7 @@ public class Employee
     [Display(Name = "Activo")]
     public bool IsActive { get; set; }
 
-    [Display(Name = "Fecha contratación")]
+    [Display(Name = "Fecha contratacion")]
     public DateTime HireDate { get; set; }
 
     [Display(Name = "Salario")]
