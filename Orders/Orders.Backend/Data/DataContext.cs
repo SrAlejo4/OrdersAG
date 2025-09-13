@@ -9,8 +9,12 @@ public class DataContext : DbContext
     {
     }
 
-    public DbSet<Category> Categories { get; set; } // Create the table as a DbSet Property
-    public DbSet<Country> Countries { get; set; } // Create the table as a DbSet Property
+    // Create the tables as a DbSet Property
+    public DbSet<Category> Categories { get; set; }
+
+    public DbSet<City> Cities { get; set; }
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<State> States { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,6 +22,19 @@ public class DataContext : DbContext
 
         // This method validate two properties don't share name.
         modelBuilder.Entity<Category>().HasIndex(x => x.Name).IsUnique();
+        modelBuilder.Entity<City>().HasIndex(x => new { x.StateId, x.Name }).IsUnique(); // One unique name of City per State
         modelBuilder.Entity<Country>().HasIndex(x => x.Name).IsUnique();
+        modelBuilder.Entity<State>().HasIndex(x => new { x.CountryId, x.Name }).IsUnique(); // One unique name of State per Country
+        DisableCascadingDelete(modelBuilder);
+    }
+
+    // Disable Cascading Delete from DataBase
+    private void DisableCascadingDelete(ModelBuilder modelBuilder)
+    {
+        var relationships = modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys());
+        foreach (var relationship in relationships)
+        {
+            relationship.DeleteBehavior = DeleteBehavior.Restrict;
+        }
     }
 }

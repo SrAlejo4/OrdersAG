@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Orders.Shared.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Orders.Shared.Entities;
 
-public class Country
+public class Country : IEntityWithName
 {
     public int Id { get; set; }
 
@@ -11,4 +12,10 @@ public class Country
                                                      "carácteres.")] // Length of column value, nvarchar(100), and an ErrorMessage
     [Required(ErrorMessage = "El campo {0} es obligatorio.")] // It makes the column País mandatory.
     public string Name { get; set; } = null!; // It won't allow null values.
+
+    // Make a relation between Country and State (One-to-many) in DataBase
+    // Create a collection of states in country entity, it can be null in case of zero states.
+    public ICollection<State>? States { get; set; }
+
+    public int StatesNumber => States == null ? 0 : States.Count;
 }
