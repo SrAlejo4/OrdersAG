@@ -1,9 +1,14 @@
-﻿using Orders.Shared.Responses;
+﻿using Orders.Shared.DTOs;
+using Orders.Shared.Responses;
 
 namespace Orders.Backend.Repositories.Interfaces;
 
 public interface IGenericRepository<T> where T : class
 {
+    Task<ActionResponse<IEnumerable<T>>> GetAsync(PaginationDTO pagination);
+
+    Task<ActionResponse<int>> GetTotalRecordsAsync(PaginationDTO pagination);
+
     Task<ActionResponse<T>> GetAsync(int id); // Get with an id as a parameter.
 
     Task<ActionResponse<IEnumerable<T>>> GetAsync(); // IEnumerable return a list of an entity.
