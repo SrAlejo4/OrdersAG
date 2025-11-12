@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Orders.Backend.UnitsOfWork.Implementations;
 using Orders.Backend.UnitsOfWork.Interfaces;
 using Orders.Shared.DTOs;
 using Orders.Shared.Entities;
@@ -17,6 +18,13 @@ public class StatesController : GenericController<State>
     public StatesController(IGenericUnitOfWork<State> unitOfWork, IStatesUnitOfWork statesUnitOfWork) : base(unitOfWork)
     {
         _statesUnitOfWork = statesUnitOfWork;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("combo/{countryId:int}")]
+    public async Task<IActionResult> GetComboAsync(int countryId)
+    {
+        return Ok(await _statesUnitOfWork.GetComboAsync(countryId));
     }
 
     [HttpGet("paginated")]

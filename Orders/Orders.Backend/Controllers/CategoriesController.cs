@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Orders.Backend.UnitsOfWork.Implementations;
 using Orders.Backend.UnitsOfWork.Interfaces;
 using Orders.Shared.DTOs;
 using Orders.Shared.Entities;
@@ -17,6 +18,13 @@ public class CategoriesController : GenericController<Category>
     public CategoriesController(IGenericUnitOfWork<Category> unit, ICategoriesUnitOfWork categoriesUnitOfWork) : base(unit)
     {
         _categoriesUnitOfWork = categoriesUnitOfWork;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("combo")]
+    public async Task<IActionResult> GetComboAsync()
+    {
+        return Ok(await _categoriesUnitOfWork.GetComboAsync());
     }
 
     [HttpGet("paginated")]
