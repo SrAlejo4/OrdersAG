@@ -62,7 +62,10 @@ namespace Orders.Backend
                 });
             });
 
-            builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection"));
+            builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection", sqlOptions =>
+            {
+                sqlOptions.CommandTimeout(180);
+            }));
 
             // Injection from SeedDb
             // This injection allow to create a DataBase with some rules by running the program.

@@ -1,49 +1,105 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Orders.Frontend.Repositories;
 using Orders.Frontend.Services;
 using Orders.Shared.DTOs;
 using Orders.Shared.Entities;
-using Orders.Shared.Enums;
+using System.Net;
 
 namespace Orders.Frontend.Components.Pages.Auth;
 
-public partial class Register
+[Authorize]
+public partial class EditUser
 {
-    private UserDTO userDTO = new();
+    private User? user;
     private List<Country>? countries;
     private List<State>? states;
     private List<City>? cities;
-    private bool loading;
+    private bool loading = true;
     private string? imageUrl;
-    private string? titleLabel;
 
     private Country selectedCountry = new();
     private State selectedState = new();
     private City selectedCity = new();
 
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] private ILoginService LoginService { get; set; } = null!;
     [Inject] private IDialogService DialogService { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [Inject] private IRepository Repository { get; set; } = null!;
-    [Parameter, SupplyParameterFromQuery] public bool IsAdmin { get; set; }
+    [Inject] private ILoginService LoginService { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadUserAsyc();
         await LoadCountriesAsync();
+        await LoadStatesAsyn(user!.City!.State!.Country!.Id);
+        await LoadCitiesAsyn(user!.City!.State!.Id);
+
+        selectedCountry = user!.City!.State!.Country!;
+        selectedState = user.City.State;
+        selectedCity = user.City;
+
+        if (!string.IsNullOrEmpty(user!.Photo))
+        {
+            imageUrl = user.Photo;
+            user.Photo = null;
+        }
     }
 
-    protected override void OnParametersSet()
+    private void ShowModal()
     {
-        base.OnParametersSet();
-        titleLabel = IsAdmin ? "Registro de Administrador" : "Registro de Usuario";
+        var closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true };
+        DialogService.Show<ChangePassword>("Cambiar Contraseña", closeOnEscapeKey);
     }
 
-    private void ImageSelected(string imageBase64)
+    private async Task LoadUserAsyc()
     {
-        userDTO.Photo = imageBase64;
+        var responseHttp = await Repository.GetAsync<User>($"/api/accounts");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+            var messageError = await responseHttp.GetErrorMessageAsync();
+            Snackbar.Add(messageError!, Severity.Error);
+            return;
+        }
+        user = responseHttp.Response;
+        loading = false;
+    }
+
+    private void ImageSelected(string imagenBase64)
+    {
+        user!.Photo = imagenBase64;
         imageUrl = null;
+    }
+
+    private async Task SaveUserAsync()
+    {
+        var responseHttp = await Repository.PutAsync<User, TokenDTO>("/api/accounts", user!);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            Snackbar.Add(message!, Severity.Error);
+            return;
+        }
+
+        await LoginService.LoginAsync(responseHttp.Response!.Token);
+        Snackbar.Add("Usuario modificado con éxito.", Severity.Success);
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void ReturnAction()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void InvalidForm()
+    {
+        Snackbar.Add("Por favor llena todos los campos del formulario.", Severity.Warning);
     }
 
     private async Task LoadCountriesAsync()
@@ -103,7 +159,7 @@ public partial class Register
     private void CityChanged(City city)
     {
         selectedCity = city;
-        userDTO.CityId = city.Id;
+        user!.CityId = city.Id;
     }
 
     private async Task<IEnumerable<Country>> SearchCountries(string searchText, CancellationToken token)
@@ -143,45 +199,5 @@ public partial class Register
         return cities!
             .Where(c => c.Name.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
             .ToList();
-    }
-
-    private void ReturnAction()
-    {
-        NavigationManager.NavigateTo("/");
-    }
-
-    private void InvalidForm()
-    {
-        Snackbar.Add("Por favor llena todos los campos del formulario.", Severity.Warning);
-    }
-
-    private async Task CreateUserAsync()
-    {
-        if (userDTO.Email is null || userDTO.PhoneNumber is null)
-        {
-            InvalidForm();
-            return;
-        }
-
-        userDTO.UserType = UserType.User;
-        userDTO.UserName = userDTO.Email;
-
-        if (IsAdmin)
-        {
-            userDTO.UserType = UserType.Admin;
-        }
-
-        loading = true;
-        var responseHttp = await Repository.PostAsync<UserDTO, TokenDTO>("/api/accounts/CreateUser", userDTO);
-        loading = false;
-        if (responseHttp.Error)
-        {
-            var message = await responseHttp.GetErrorMessageAsync();
-            Snackbar.Add(message!, Severity.Error);
-            return;
-        }
-
-        await LoginService.LoginAsync(responseHttp.Response!.Token);
-        NavigationManager.NavigateTo("/");
     }
 }

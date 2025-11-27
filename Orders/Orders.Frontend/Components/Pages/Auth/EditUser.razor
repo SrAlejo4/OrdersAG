@@ -1,4 +1,4 @@
-﻿@page "/Register"
+﻿@page "/EditUser"
 @using Orders.Shared.Entities
 
 @if (loading)
@@ -7,42 +7,30 @@
 }
 else
 {
-    <EditForm Model="userDTO"
-              OnValidSubmit="CreateUserAsync"
-              OnInvalidSubmit="InvalidForm"
-              FormName="RegisterForm">
+    <MudItem>
+        <MudText Typo="Typo.h5">Editar Usuario</MudText>
+    </MudItem>
+    <EditForm Model="user" OnValidSubmit="SaveUserAsync">
         <DataAnnotationsValidator />
         <MudGrid>
             <MudItem xs="12" sm="6">
                 <MudCardContent>
                     <MudTextField Label="Nombre"
-                                  @bind-Value="userDTO.FirstName"
-                                  For="@(() => userDTO.FirstName)" />
+                                  @bind-Value="user!.FirstName"
+                                  For="@(() => user!.FirstName)" />
                     <MudTextField Label="Apellido"
-                                  @bind-Value="userDTO.LastName"
-                                  For="@(() => userDTO.LastName)" />
+                                  @bind-Value="user.LastName"
+                                  For="@(() => user.LastName)" />
                     <MudTextField Label="Documento"
-                                  @bind-Value="userDTO.Document"
-                                  For="@(() => userDTO.Document)" />
+                                  @bind-Value="user.Document"
+                                  For="@(() => user.Document)" />
                     <MudTextField Label="Telefono"
-                                  @bind-Value="userDTO.PhoneNumber"
-                                  For="@(() => userDTO.PhoneNumber)"
+                                  @bind-Value="user.PhoneNumber"
+                                  For="@(() => user.PhoneNumber)"
                                   InputType="InputType.Telephone" />
-                    <MudTextField Label="Email"
-                                  @bind-Value="userDTO.Email"
-                                  For="@(() => userDTO.Email)"
-                                  InputType="InputType.Email" />
                     <MudTextField Label="Dirección"
-                                  @bind-Value="userDTO.Address"
-                                  For="@(() => userDTO.Address)" />
-                    <MudTextField Label="Contraseña"
-                                  InputType="InputType.Password"
-                                  @bind-Value="userDTO.Password"
-                                  For="@(() => userDTO.Password)" />
-                    <MudTextField Label="Confirmar Contraseña"
-                                  InputType="InputType.Password"
-                                  @bind-Value="userDTO.PasswordConfirm"
-                                  For="@(() => userDTO.PasswordConfirm)" />
+                                  @bind-Value="user.Address"
+                                  For="@(() => user.Address)" />
                 </MudCardContent>
             </MudItem>
             <MudItem xs="12" sm="6">
@@ -85,14 +73,23 @@ else
                     <InputImg Label="Foto" ImageSelected="ImageSelected" ImageURL="@imageUrl" />
                 </MudItem>
             </MudItem>
-            <MudItem xs="12" Class="d-flex justify-center mt-2">
-                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Info" OnClick="ReturnAction" Class="ms-2 me-2 mb-2">
-                    Regresar
-                </MudButton>
-                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mb-2">
-                    Guardar
-                </MudButton>
-            </MudItem>
+            <MudGrid Justify="Justify.Center" Class="mt-4">
+                <MudItem>
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary" OnClick="SaveUserAsync">
+                        Guardar Cambios
+                    </MudButton>
+                </MudItem>
+                <MudItem>
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.LockReset" Color="Color.Secondary" OnClick="ShowModal">
+                        Cambiar Contraseña
+                    </MudButton>
+                </MudItem>
+                <MudItem>
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Info" OnClick="ReturnAction">
+                        Cancelar
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
         </MudGrid>
     </EditForm>
 }
