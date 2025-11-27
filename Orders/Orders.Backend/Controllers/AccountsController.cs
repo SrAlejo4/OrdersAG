@@ -29,7 +29,7 @@ public class AccountsController : ControllerBase
         _container = "users";
     }
 
-    /*[HttpPost("changePassword")]
+    [HttpPost("changePassword")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDTO model)
     {
@@ -51,7 +51,7 @@ public class AccountsController : ControllerBase
         }
 
         return NoContent();
-    }*/
+    }
 
     [HttpPut]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
